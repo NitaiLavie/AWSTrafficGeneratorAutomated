@@ -2,6 +2,9 @@ package com.nsslawsproject.constants;
 
 public class connectionConstants {
 	
+	// here we hold the connection constants we use in the traffic generator
+	// some are in use and some are not
+	
 	public static final int distParam = 3;
 	public static final String host = "aws-project-load-balancer-979509742.us-east-2.elb.amazonaws.com";
 	//public static final String host ="127.0.0.1";

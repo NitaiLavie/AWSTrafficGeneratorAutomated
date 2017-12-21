@@ -11,6 +11,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LogWriter {
+	// a log writing object for easy and synchronized log writing by the client tasks
 	private Lock mLock;
 	private String mLogFileName;
 	private Writer mLogWriter;
@@ -24,7 +25,6 @@ public class LogWriter {
 					new FileOutputStream(mLogFileName), "utf-8")
 			);
 		} catch (UnsupportedEncodingException | FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -35,7 +35,6 @@ public class LogWriter {
 			mLogWriter.write(log + "\n");
 			mLogWriter.flush();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		mLock.unlock();

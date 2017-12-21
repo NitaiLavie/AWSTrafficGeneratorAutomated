@@ -24,17 +24,19 @@ import com.amazonaws.services.cloudwatch.model.Statistic;
 public class TrafficGenerator {
 	
 	public static void main(String[] args ) throws InterruptedException {
+		// main traffic generator thread. where all the action is going on
 		
-		int numOfTasks = Integer.parseInt(args[0]);
-		double lowThreshold = Double.parseDouble(args[1]);
-		double highThreshold = Double.parseDouble(args[2]);
+		// getting command line parameters:
+		int numOfTasks = Integer.parseInt(args[0]); // the number of client tasks to generate
+		double lowThreshold = Double.parseDouble(args[1]); // low threashold for cloudwath alarm
+		double highThreshold = Double.parseDouble(args[2]); // high threashold for cloudwath alarm
 		
-		setAwsAlarms(lowThreshold, highThreshold);
+		setAwsAlarms(lowThreshold, highThreshold); // set the alarms with aws java api
 		
-		Random sleepy = new Random();
-		Random workRand = new Random();
-		double sendingRate = 3/(double)connectionConstants.sleepMulitplierOneMachineLoad;
-		double handlingRate = 1/(double)connectionConstants.iterations;
+		Random sleepy = new Random(); // a random number generator for sleep time between client tasks
+		Random workRand = new Random(); // a random number generator for server task iterations
+		double sendingRate = 3/(double)connectionConstants.sleepMulitplierOneMachineLoad; // sending rate average
+		double handlingRate = 1/(double)connectionConstants.iterations; // server task iterations average
 		Long sleepTime;
 		Long handlingTime;
 		LogWriter logWriter = new LogWriter(
@@ -42,28 +44,28 @@ public class TrafficGenerator {
 				System.currentTimeMillis() +"_"+
 				lowThreshold+"-low_"+
 				highThreshold+"-high"+
-				".log");
-		logWriter.write("client_num,time_stamp,event,server_id,avg_thread_count\n");
+				".log"); // create the log writer
+		logWriter.write("client_num,time_stamp,event,server_id,avg_thread_count\n"); // write log header
 		
 		for(int counter=1;counter<=numOfTasks;counter++) {
 			//sleepTime = Math.round(getTanhSleepMultiplier()*getExpRandom(sleepy, sendingRate));
 			//sleepTime = Math.round(getLinearSleepMultiplier()*getExpRandom(sleepy, sendingRate));
 			//sleepTime = Math.round(connectionConstants.sleepMulitplier*getExpRandom(sleepy, sendingRate));
-			sleepTime = Math.round(getExpRandom(sleepy, sendingRate));
+			sleepTime = Math.round(getExpRandom(sleepy, sendingRate)); // get exponentially distributed sleep time
 			//sleepTime = (long) getLinearSleepMultiplier();
 			//sleepTime = (long) getLinearFrequencySleepMultiplier();
 			//sleepTime = (long) connectionConstants.sleepMulitplier;
-			handlingTime = Math.round(getExpRandom(workRand, handlingRate));
+			handlingTime = Math.round(getExpRandom(workRand, handlingRate)); // get exponentially distributed server task iterations
 			
-			Thread.sleep(sleepTime); 
+			Thread.sleep(sleepTime); // wait between client tasks
 			//System.out.println("slept for: " + sleepTime+ "\n" );
-			new AWSClient(logWriter, counter, handlingTime).start();
+			new AWSClient(logWriter, counter, handlingTime).start(); // create the client task thread
 		}
 		
 	}
 	
     private static void setAwsAlarms(double lowThreshold, double highThreshold) {
-    	
+    	// set aws cloud watch alarms with aws java api
     	final AmazonCloudWatch cw =
     		    AmazonCloudWatchClientBuilder.defaultClient();
     		
@@ -116,10 +118,12 @@ public class TrafficGenerator {
 	}
 
 	public static double getExpRandom(Random r, double p) { 
+		// generating an exponentially distributed value out of a uniformly distributed value
         return -Math.log((1-r.nextDouble())) / p; 
     }
     
     public static double getTanhSleepMultiplier() {
+    	// no used - varying sleep time - used for testing
     	long currentTime = System.currentTimeMillis() - connectionConstants.startTime;
     	return	(
     				Math.tanh(
@@ -134,6 +138,7 @@ public class TrafficGenerator {
     }
     
     public static double getLinearSleepMultiplier() {
+    	// no used - varying sleep time - used for testing
     	long currentTime = System.currentTimeMillis() - connectionConstants.startTime;
     	return (
     		(connectionConstants.sleepMulitplierEnd - connectionConstants.sleepMulitplierStart)
@@ -142,6 +147,7 @@ public class TrafficGenerator {
     }
     
     public static double getLinearFrequencySleepMultiplier() {
+    	// no used - varying sleep time - used for testing
     	int maxMachines = connectionConstants.sleepMultiplierMaxMachines;
     	long currentTime = System.currentTimeMillis() - connectionConstants.startTime;
     	double machineNum = ((double) currentTime
